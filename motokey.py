@@ -62,22 +62,30 @@ SPECIAL_MODIFIERS = {
 for c in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ':
     SPECIAL_MODIFIERS[c] = 'shift'
 
-# keyboards detection before creatin a virtual one
-# devices = [InputDevice(path) for path in list_devices()]
-# keyboards = []
-# for device in devices:
-#    if  device.name.upper().find("KEYBOARD") != -1:
-#       keyboards.append(device)
-# if len(keyboards)==0:
-#    print("no keyboards found")
-#    exit(1)
-# k = 0
-# if len(keyboards)!=1:
-#     for i,k in enumerate(keyboards):
-#         print(f"{i=} {k.name=}")
-#     k= int(input("which one ? "))
-# dev = keyboards[k]
-# print(f"{dev=}")
+def keyboardSelection():
+    """
+    exit if no keyboard found
+    ask is more than one keyboard found
+    """
+    # keyboards detection 
+    devices = [InputDevice(path) for path in list_devices()]
+    keyboards = []
+    for device in devices:
+       if  device.name.upper().find("KEYBOARD") != -1:
+          keyboards.append(device)
+    if len(keyboards)==0:
+       print("no keyboards found")
+       exit(1)
+    k = 0
+    if len(keyboards)!=1:
+        for i,k in enumerate(keyboards):
+            print(f"{i=} {k.name=}")
+        k= int(input("which one ? "))
+    dev = keyboards[k]
+    print(f"{dev=}")
+    return dev
+
+dev = keyboardSelection()
 
 # --- Crée le clavier virtuel ---
 ui = UInput({ecodes.EV_KEY: list(KEYMAP.values()) + [ecodes.KEY_LEFTSHIFT, ecodes.KEY_RIGHTALT]}, name="virtual_keyboard")
@@ -104,26 +112,27 @@ def send_char(c):
     else:
         ui.write(ecodes.EV_KEY, KEYMAP[c], 1)
         ui.write(ecodes.EV_KEY, KEYMAP[c], 0)
-        ui.syn()
-        time.sleep(0.01)
+    ui.syn()
+    time.sleep(0.01)
 
 def send_text(text):
     for c in text:
         send_char(c)
 
 # --- Exemple ---
-time.sleep(1)
+# time.sleep(1)
 # send_text("1Changed1_")
 # send_char('\n')  # Enter
+# import sys
 # send_text("1changed1")
 # send_char('\n')  # Enter
 # send_text("jeanchristian@anglesdauriac.fr")
 # send_char('\n')  # Enter
-send_text("E#e7o=p_u?")
-import sys;sys.exit(123)
+# send_text("E#e7o=p_u?")
 # send_char('\n')  # Enter
 # send_text("myriam@anglesdauriac.fr")
-#########################################"
+#########################################
+
 # On garde en mémoire l'état courant des touches
 keys_down = set()
 for event in dev.read_loop():
