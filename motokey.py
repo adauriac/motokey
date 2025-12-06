@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import time
+import time,sys
 from evdev import UInput, ecodes,list_devices,InputDevice
 
 # --- Mapping AZERTY complet ---
@@ -71,8 +71,11 @@ def keyboardSelection():
     devices = [InputDevice(path) for path in list_devices()]
     keyboards = []
     for device in devices:
-       if  device.name.upper().find("KEYBOARD") != -1:
-          keyboards.append(device)
+       if  device.name.upper().find("KEYBOARD") == -1:
+           continue
+       if  device.name.upper().find("VIRTUAL") == -1:
+           continue
+       keyboards.append(device)
     if len(keyboards)==0:
        print("no keyboards found")
        exit(1)
@@ -84,12 +87,6 @@ def keyboardSelection():
     dev = keyboards[k]
     print(f"{dev=}")
     return dev
-
-dev = keyboardSelection()
-
-# --- Crée le clavier virtuel ---
-ui = UInput({ecodes.EV_KEY: list(KEYMAP.values()) + [ecodes.KEY_LEFTSHIFT, ecodes.KEY_RIGHTALT]}, name="virtual_keyboard")
-time.sleep(1)  # laisser le temps de placer le curseur
 
 def send_char(c):
     if c.isupper():
@@ -118,6 +115,16 @@ def send_char(c):
 def send_text(text):
     for c in text:
         send_char(c)
+
+# --- Crée le clavier virtuel ---
+ui = UInput({ecodes.EV_KEY: list(KEYMAP.values()) + [ecodes.KEY_LEFTSHIFT, ecodes.KEY_RIGHTALT]}, name="virtual_keyboard")
+
+# print("ds 3 sec je balance la puree")
+# time.sleep(3)  # laisser le temps de placer le curseur
+# send_text("1changed1")
+# sys.exit(1)
+
+dev = keyboardSelection()
 
 # --- Exemple ---
 # time.sleep(1)
